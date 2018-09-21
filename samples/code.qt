@@ -1,0 +1,51 @@
+use::fs;
+
+stream<w> out = fs.stdout;
+
+thread x: int {
+  out << "B";
+  sleep(3);
+  out << "C";
+  return 4;
+}
+
+out << "A";
+
+ret: int = await x;
+
+out << "D";
+
+chan y: string | null {
+  case "X":
+    out << "Hello";
+    return "Z";
+
+  case "Z":
+    out << "World";
+    return "X";
+
+  default:
+    out << "I don't know what to do!";
+    return null;
+}
+
+// This will print `Hello World`
+pipe test = y, y;
+"X" >> test;
+
+if ret > 0 {
+  out << "WOOOOOW";
+}
+
+t: [int, int] = [3, 5];
+
+p = t.0 * t.1;
+
+sth(p: int, cb: () => void): int {
+  stream<r> in = fs.stdin;
+  stream<rw> io = (fs.stdin, fs.stdout);
+  in >> x: int;
+  io << x;
+}
+
+sth();

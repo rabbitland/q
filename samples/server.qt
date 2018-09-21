@@ -1,0 +1,24 @@
+use::net;
+use::fs;
+
+stream<r> server = net.http();
+
+server.listen("0.0.0.0:9090");
+
+chan handler<client: net.Client>: void {
+  client.io << "Hello World\n";
+  client.io << net.EOF;
+}
+
+thread server {
+  while true {
+    net.Client client = await server.accept();
+    client >> handler;
+  }
+}
+
+
+fs.stdout << "Server Started";
+
+await server;
+
