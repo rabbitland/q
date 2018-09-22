@@ -114,7 +114,7 @@ char* tokenName(Token *token) {
 
 void printToken(Token *token) {
   printf(
-      ">> pos:\t%d,\ttype[0x%02lX]: %s,\tdata: <%s>\n",
+      ">> pos:\t%d,\ttype[%02d]: %s,\tdata: <%s>\n",
       token->start,
       token->type,
       tokenName(token),
@@ -122,7 +122,7 @@ void printToken(Token *token) {
       );
 }
 
-int main() {
+int tokenize() {
   char *code = "if x |= 3;\n// test \nvar = 32 + x * 4; DA = 'Hello World'; c = 's\\' s'";
   printf("Code:\n%s\n", code);
 
@@ -151,7 +151,6 @@ int main() {
         ++num_tokens;
         tokens = realloc(tokens, num_tokens * sizeof(Token) + 1);
         memcpy(tokens + (num_tokens - 1) * sizeof(Token), &token, sizeof(Token));
-        memset(tokens + num_tokens * sizeof(Token), 0x00, 1);
       }
       // Read the next characters.
       cursor += token.len;
@@ -319,6 +318,8 @@ one_byte:
     cursor++;
     insert_token = 0;
   } while (1);
+
+  memset(tokens + num_tokens * sizeof(Token), 0x00, 1);
 
   printf("\nTokens:\n");
   for (int i = 0; ; i += sizeof(Token)) {
