@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stddef.h>
 #include <string.h>
 #include <ctype.h>
 #include "token.h"
@@ -16,9 +17,9 @@ char* KEYWORDS[] = {
   // TODO(qti3e)
 };
 
-char *tokenData(Token *token, char *code) {
+char *tokenData(Token *token, char **code) {
   // Skip characters to the start.
-  char *data = code + token->start;
+  char *data = *code + token->start;
   // Allocate memory and copy the substr into it.
   void *ptr = malloc(token->len + 1);
   memset(ptr + token->len, 0x00, 1);
@@ -53,22 +54,26 @@ char* tokenName(Token *token) {
   }
 }
 
-void printToken(Token *token, char *code) {
+void printToken(Token *token, char **code) {
+  char *data = tokenData(token, code);
   printf(
-      ">> pos:\t%d,\ttype[%02d]: %s,\tdata: <%s> %d\n",
+      ">> pos:\t%d \ttype[%02d]: %s \tdata: <%s>\n",
       token->start,
       token->type,
       tokenName(token),
-      tokenData(token, code),
-      token->len
-      );
+      data);
+  free(data);
 }
 
-void* tokenize(char *code) {
+void freeTokenArray(TokenArray *t) {
+  free(t);
+}
+
+TokenArray *tokenize(char *code, int skip_comments) {
   int num_tokens = 0;
-  // size = num_tokens * sizeof(Token) + 1;
-  // `tokens` is zero terminated so we allocate one more byte for it.
-  void *tokens = malloc(1);
+  // size = token_array_size + num_tokens * sizeof(Token);
+  size_t token_array_size = offsetof(TokenArray, tokens);
+  void *tokens = malloc(token_array_size);
   // Temporary token.
   Token token;
   // Flag to check if we should insert token into tokens or not.
@@ -80,16 +85,13 @@ void* tokenize(char *code) {
   char c;
   char next_char;
 
-  int skip_comments = 0;
-
   do {
     if (insert_token) {
       if (token.type != COMMENT || !skip_comments) {
         // Insert `token` to tokens.
         ++num_tokens;
-        tokens = realloc(tokens, num_tokens * sizeof(Token) + 1);
-        memcpy(tokens + (num_tokens - 1) * sizeof(Token), &token, sizeof(Token));
-        memset(tokens + num_tokens * sizeof(Token), 0x00, 1);
+        tokens = realloc(tokens, token_array_size + num_tokens * sizeof(Token));
+        memcpy(token_array_size + tokens + (num_tokens - 1) * sizeof(Token), &token, sizeof(Token));
       }
       // Read the next characters.
       cursor += token.len;
@@ -180,7 +182,7 @@ void* tokenize(char *code) {
       // Default to IDENTIFIER
       token.type = IDENTIFIER;
       token.start = cursor; insert_token = 1;
-      char* identifier = tokenData(&token, code);
+      char* identifier = tokenData(&token, &code);
       size_t n = sizeof(KEYWORDS)/sizeof(KEYWORDS[0]);
       for (int i = 0; i < n; ++i) {
         if (strcmp(identifier, KEYWORDS[i]) == 0) {
@@ -188,6 +190,7 @@ void* tokenize(char *code) {
           break;
         }
       }
+      free(identifier);
       continue;
     }
 
@@ -257,13 +260,8 @@ one_byte:
     insert_token = 0;
   } while (1);
 
-  for (int i = 0; ; i += sizeof(Token)) {
-    char *x = tokens + i;
-    if (x[0] == 0x00) {
-      break;
-    }
-    printToken(tokens + i, code);
-  }
+  TokenArray *ret = tokens;
+  ret->count = num_tokens;
 
-  return tokens;
+  return ret;
 }

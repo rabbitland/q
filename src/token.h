@@ -60,7 +60,15 @@ struct Token {
   int len;
 } typedef Token; 
 
-void printToken(Token *token, char *code);
-void* tokenize(char *code);
+struct TokenArray {
+  size_t count;
+  Token tokens[];
+} typedef TokenArray;
+
+char *tokenData(Token *token, char **code);
+char *tokenName(Token *token);
+void printToken(Token *token, char **code);
+void freeTokenArray(TokenArray *t);
+TokenArray *tokenize(char *code, int skip_comments);
 
 #endif
