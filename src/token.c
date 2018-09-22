@@ -56,13 +56,18 @@ char* tokenName(Token *token) {
 
 void printToken(Token *token, char **code) {
   char *data = tokenData(token, code);
+  if (token->type == LINE_BREAK) {
+    data = "\\n";
+  }
   printf(
       ">> pos:\t%d \ttype[%02d]: %s \tdata: <%s>\n",
       token->start,
       token->type,
       tokenName(token),
       data);
-  free(data);
+  if (token->type != LINE_BREAK) {
+    free(data);
+  }
 }
 
 void freeTokenArray(TokenArray *t) {
@@ -101,15 +106,6 @@ TokenArray *tokenize(char *code, int skip_comments) {
     c = code[cursor];
     next_char = code[cursor + 1];
     if (c == 0x00) break;
-    // If it's the last character, jump to check
-    // one byte tokens.
-    if (next_char == 0x00) goto one_byte;
-
-    // Skip white spaces.
-    if (isspace(c)) {
-      cursor++;
-      continue;
-    }
 
     // Handle LINE_BREAK.
     if (c == 0x0A) {
@@ -118,6 +114,12 @@ TokenArray *tokenize(char *code, int skip_comments) {
       token.start = cursor;
       token.len = 1;
       insert_token = 1;
+      continue;
+    }
+
+    // Skip white spaces.
+    if (isspace(c)) {
+      cursor++;
       continue;
     }
 
@@ -132,6 +134,7 @@ TokenArray *tokenize(char *code, int skip_comments) {
         c = code[cursor + token.len + 1];
         ++token.len;
       }
+      continue;
     }
 
     // Handle STRING_LITERAL
@@ -202,6 +205,10 @@ two_byte:
     // -- Two byte tokens
     token.len = 2;
 
+    // If it's the last character, jump to check
+    // one byte tokens.
+    if (next_char == 0x00) goto one_byte;
+
     if (next_char == '=') {
       switch (c) {
         case '=': token.type = EQUALITY; continue;
@@ -256,8 +263,8 @@ one_byte:
 
     // TODO(qti3e) Error <UNEXPECTED_CHARACTER>
     // But for now let's just skip this unknown character:
-    cursor++;
-    insert_token = 0;
+    printf("Error! %d %d [%c]\n", cursor, c, c);
+    return NULL;
   } while (1);
 
   TokenArray *ret = tokens;
