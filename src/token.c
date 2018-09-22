@@ -2,67 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-
-enum TokenType {
-  LINE_BREAK,
-  // Many bytes
-  NUMERIC_LITERAL,
-  STRING_LITERAL,
-  COMMENT,
-  IDENTIFIER,
-  KEYWORD,
-  // Two byte
-  DOT_DOT, // ..
-  EQUALITY, // ==
-  INEQUALITY, // !=
-  LOGICAL_OR, // ||
-  LOGICAL_AND, // &&
-  BIT_OR_ASSIGN, // |=
-  BIT_XOR_ASSIGN, // ^=
-  BIT_NOT_ASSIGN, // ~=
-  AND_ASSIGN, // &=
-  PLUS_ASSIGN, // +=
-  MINUS_ASSIGN, // -=
-  TIMES_ASSIGN, // *=
-  DIV_ASSIGN, // /=
-  LEFT_SHIFT, // <<
-  RIGHT_SHIFT, // >>
-  GREATER_THAN_EQUAL, // >=
-  LESS_THAN_EQUAL, // <=
-  INCREMENT, // ++
-  DECREMENT, // --
-  // One byte
-  DOT, // .
-  OPEN_PARENTHESIS, // (
-  CLOSE_PARENTHESIS, // )
-  OPEN_BRACE, // {
-  CLOSE_BRACE, // }
-  OPEN_BRACKET, // [
-  CLOSE_BRACKET, // ]
-  SEMICOLON, // ;
-  COLON, // :
-  COMMA, // ,
-  ASSIGNMENT, // =
-  BIT_OR, // |
-  BIT_AND, // &
-  BIT_XOR, // ^
-  BIT_NOT, // ~
-  NOT, // !
-  PLUS, // +
-  MINUS, // -
-  TIMES, // *
-  DIV, // /
-  GREATER_THAN, // >
-  LESS_THAN, // <
-};
-
-struct Token {
-  enum TokenType type;
-  char **code;
-  int start;
-  int len;
-} typedef Token; 
-
+#include "token.h"
 
 char* KEYWORDS[] = {
   // CONTROL FLOW 
@@ -76,11 +16,12 @@ char* KEYWORDS[] = {
   // TODO(qti3e)
 };
 
-char *tokenData(Token *token) {
+char *tokenData(Token *token, char *code) {
   // Skip characters to the start.
-  char *data = *token->code + token->start;
+  char *data = code + token->start;
   // Allocate memory and copy the substr into it.
-  void *ptr = malloc(token->len);
+  void *ptr = malloc(token->len + 1);
+  memset(ptr + token->len, 0x00, 1);
   strncpy(ptr, data, token->len);
   return ptr;
 }
@@ -112,27 +53,24 @@ char* tokenName(Token *token) {
   }
 }
 
-void printToken(Token *token) {
+void printToken(Token *token, char *code) {
   printf(
-      ">> pos:\t%d,\ttype[%02d]: %s,\tdata: <%s>\n",
+      ">> pos:\t%d,\ttype[%02d]: %s,\tdata: <%s> %d\n",
       token->start,
       token->type,
       tokenName(token),
-      tokenData(token)
+      tokenData(token, code),
+      token->len
       );
 }
 
-int tokenize() {
-  char *code = "if x |= 3;\n// test \nvar = 32 + x * 4; DA = 'Hello World'; c = 's\\' s'";
-  printf("Code:\n%s\n", code);
-
+void* tokenize(char *code) {
   int num_tokens = 0;
   // size = num_tokens * sizeof(Token) + 1;
   // `tokens` is zero terminated so we allocate one more byte for it.
   void *tokens = malloc(1);
   // Temporary token.
   Token token;
-  token.code = &code;
   // Flag to check if we should insert token into tokens or not.
   int insert_token = 0;
   
@@ -151,6 +89,7 @@ int tokenize() {
         ++num_tokens;
         tokens = realloc(tokens, num_tokens * sizeof(Token) + 1);
         memcpy(tokens + (num_tokens - 1) * sizeof(Token), &token, sizeof(Token));
+        memset(tokens + num_tokens * sizeof(Token), 0x00, 1);
       }
       // Read the next characters.
       cursor += token.len;
@@ -219,7 +158,7 @@ int tokenize() {
     }
 
     // Handle COMMENT
-    if (c == 0x2F && code[cursor + 1] == 0x2F) {
+    if (c == '/' && next_char == '/') {
       token.len = 0;
       while (c != 0x0A && c != 0x00) {
         c = code[cursor + token.len + 1];
@@ -240,9 +179,8 @@ int tokenize() {
       }
       // Default to IDENTIFIER
       token.type = IDENTIFIER;
-      token.start = cursor;
-      insert_token = 1;
-      char* identifier = tokenData(&token);
+      token.start = cursor; insert_token = 1;
+      char* identifier = tokenData(&token, code);
       size_t n = sizeof(KEYWORDS)/sizeof(KEYWORDS[0]);
       for (int i = 0; i < n; ++i) {
         if (strcmp(identifier, KEYWORDS[i]) == 0) {
@@ -319,16 +257,13 @@ one_byte:
     insert_token = 0;
   } while (1);
 
-  memset(tokens + num_tokens * sizeof(Token), 0x00, 1);
-
-  printf("\nTokens:\n");
   for (int i = 0; ; i += sizeof(Token)) {
     char *x = tokens + i;
     if (x[0] == 0x00) {
       break;
     }
-    printToken(tokens + i);
+    printToken(tokens + i, code);
   }
 
-  free(tokens);
+  return tokens;
 }
