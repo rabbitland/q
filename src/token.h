@@ -29,7 +29,6 @@ enum TokenType {
   LESS_THAN_EQUAL, // <=
   INCREMENT, // ++
   DECREMENT, // --
-  // TODO(qti3e)
   MOD_ASSIGN, // %=
   // One byte
   DOT, // .
@@ -54,7 +53,6 @@ enum TokenType {
   DIV, // /
   GREATER_THAN, // >
   LESS_THAN, // <
-  // TODO(qti3e)
   MOD, // %
 };
 

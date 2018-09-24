@@ -10,9 +10,8 @@ char* KEYWORDS[] = {
   "if", "while", "for",
   // TYPES
   "int", "void", "string", "null",
-  // Q
-  "chan", "thread", "pipe",
   // RESERVED
+  "chan", "thread", "pipe",
   "public", "private", "protected", "class",
   // TODO(qti3e)
 };
@@ -223,6 +222,7 @@ two_byte:
         case '/': token.type = DIV_ASSIGN; continue;
         case '>': token.type = GREATER_THAN_EQUAL; continue;
         case '<': token.type = LESS_THAN_EQUAL; continue;
+        case '%': token.type = MOD_ASSIGN; continue;
       }
     }
 
@@ -260,9 +260,10 @@ one_byte:
     if (c == '/') { token.type = DIV; continue; }
     if (c == '>') { token.type = GREATER_THAN; continue; }
     if (c == '<') { token.type = LESS_THAN; continue; }
+    if (c == '%') { token.type = MOD; continue; }
 
-    // TODO(qti3e) Error <UNEXPECTED_CHARACTER>
-    // But for now let's just skip this unknown character:
+    // TODO(qti3e) Use a global var for error handling.
+    // Maybe call it `q_last_err`.
     printf("Error! %d %d [%c]\n", cursor, c, c);
     return NULL;
   } while (1);
