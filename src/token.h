@@ -10,6 +10,7 @@ enum TokenType {
   IDENTIFIER,
   KEYWORD,
   // Two byte
+  COLON_COLON, // ::
   DOT_DOT, // ..
   EQUALITY, // ==
   INEQUALITY, // !=

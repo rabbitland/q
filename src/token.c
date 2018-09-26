@@ -8,7 +8,8 @@
 char* KEYWORDS[] = {
   // CONTROL FLOW 
   "if", "while", "for", "break", "continue",
-  "return", "switch", "case"
+  "return", "switch", "case", "use", "var",
+  "print"
   // INTERNAL TYPES
   "int", "void", "string", "null"
 };
@@ -224,6 +225,7 @@ two_byte:
       }
     }
 
+    if (c == ':' && next_char == ':') { token.type = COLON_COLON; continue; }
     if (c == '.' && next_char == '.') { token.type = DOT_DOT; continue; }
     if (c == '|' && next_char == '|') { token.type = LOGICAL_OR; continue; }
     if (c == '&' && next_char == '&') { token.type = LOGICAL_AND; continue; }

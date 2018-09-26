@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "token.h"
+#include "parser.h"
 
 int main(int argc, char *argv[]) {
   if (argc != 2) {
@@ -29,10 +30,7 @@ int main(int argc, char *argv[]) {
     printf("There was an error!\n");
     exit(-1);
   }
-  printf("Number of tokens: %zu\n", tokens_array->count);
-  for (int i = 0; i < tokens_array->count; ++i) {
-    printToken(&tokens_array->tokens[i], &code);
-  }
+  parse_tokens(tokens_array, &code);
   freeTokenArray(tokens_array);
 
   return 0;
