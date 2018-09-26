@@ -7,13 +7,10 @@
 
 char* KEYWORDS[] = {
   // CONTROL FLOW 
-  "if", "while", "for",
-  // TYPES
-  "int", "void", "string", "null",
-  // RESERVED
-  "chan", "thread", "pipe",
-  "public", "private", "protected", "class",
-  // TODO(qti3e)
+  "if", "while", "for", "break", "continue",
+  "return", "switch", "case"
+  // INTERNAL TYPES
+  "int", "void", "string", "null"
 };
 
 char *tokenData(Token *token, char **code) {
@@ -56,6 +53,7 @@ char* tokenName(Token *token) {
 void printToken(Token *token, char **code) {
   char *data = tokenData(token, code);
   if (token->type == LINE_BREAK) {
+    free(data);
     data = "\\n";
   }
   printf(
