@@ -24,30 +24,143 @@ char *tokenData(Token *token, char **code) {
   return ptr;
 }
 
+// TODO(qti3e) This is ugly, we can use a macro
+// to generate an enum and an array of chars containg
+// each enum name.
 char* tokenName(Token *token) {
   switch (token->type) {
-    case IDENTIFIER:
-      return "IDENTIFIER";
-    case KEYWORD:
-      return "KEYWORD";
-    case COMMENT:
-      return "COMMENT";
-    case NUMERIC_LITERAL:
-    case STRING_LITERAL:
-      return "LITERAL";
-    case OPEN_PARENTHESIS:
-    case CLOSE_PARENTHESIS:
-      return "PARENTHESIS";
-    case OPEN_BRACE:
-    case CLOSE_BRACE:
-      return "BRACE";
-    case OPEN_BRACKET:
-    case CLOSE_BRACKET:
-      return "BRACKET";
     case LINE_BREAK:
       return "LINE_BREAK";
-    default:
-      return "OPERATOR";
+    case NUMERIC_LITERAL:
+      return "NUMERIC_LITERAL";
+    case STRING_LITERAL:
+      return "STRING_LITERAL";
+    case COMMENT:
+      return "COMMENT";
+    case IDENTIFIER:
+      return "IDENTIFIER";
+    case START_OF_KEYWORDS:
+      return "START_OF_KEYWORDS";
+    case IF_KEYWORD:
+      return "IF_KEYWORD";
+    case WHILE_KEYWORD:
+      return "WHILE_KEYWORD";
+    case FOR_KEYWORD:
+      return "FOR_KEYWORD";
+    case BREAK_KEYWORD:
+      return "BREAK_KEYWORD";
+    case CONTINUE_KEYWORD:
+      return "CONTINUE_KEYWORD";
+    case RETURN_KEYWORD:
+      return "RETURN_KEYWORD";
+    case SWITCH_KEYWORD:
+      return "SWITCH_KEYWORD";
+    case CASE_KEYWORD:
+      return "CASE_KEYWORD";
+    case USE_KEYWORD:
+      return "USE_KEYWORD";
+    case VAR_KEYWORD:
+      return "VAR_KEYWORD";
+    case PRINT_KEYWORD:
+      return "PRINT_KEYWORD";
+    case INT_KEYWORD:
+      return "INT_KEYWORD";
+    case VOID_KEYWORD:
+      return "VOID_KEYWORD";
+    case STRING_KEYWORD:
+      return "STRING_KEYWORD";
+    case NULL_KEYWORD:
+      return "NULL_KEYWORD";
+    case END_OF_KEYWORDS:
+      return "END_OF_KEYWORDS";
+    case COLON_COLON:
+      return "COLON_COLON";
+    case DOT_DOT:
+      return "DOT_DOT";
+    case EQUALITY:
+      return "EQUALITY";
+    case INEQUALITY:
+      return "INEQUALITY";
+    case LOGICAL_OR:
+      return "LOGICAL_OR";
+    case LOGICAL_AND:
+      return "LOGICAL_AND";
+    case BIT_OR_ASSIGN:
+      return "BIT_OR_ASSIGN";
+    case BIT_XOR_ASSIGN:
+      return "BIT_XOR_ASSIGN";
+    case BIT_NOT_ASSIGN:
+      return "BIT_NOT_ASSIGN";
+    case AND_ASSIGN:
+      return "AND_ASSIGN";
+    case PLUS_ASSIGN:
+      return "PLUS_ASSIGN";
+    case MINUS_ASSIGN:
+      return "MINUS_ASSIGN";
+    case TIMES_ASSIGN:
+      return "TIMES_ASSIGN";
+    case DIV_ASSIGN:
+      return "DIV_ASSIGN";
+    case LEFT_SHIFT:
+      return "LEFT_SHIFT";
+    case RIGHT_SHIFT:
+      return "RIGHT_SHIFT";
+    case GREATER_THAN_EQUAL:
+      return "GREATER_THAN_EQUAL";
+    case LESS_THAN_EQUAL:
+      return "LESS_THAN_EQUAL";
+    case INCREMENT:
+      return "INCREMENT";
+    case DECREMENT:
+      return "DECREMENT";
+    case MOD_ASSIGN:
+      return "MOD_ASSIGN";
+    case DOT:
+      return "DOT";
+    case OPEN_PARENTHESIS:
+      return "OPEN_PARENTHESIS";
+    case CLOSE_PARENTHESIS:
+      return "CLOSE_PARENTHESIS";
+    case OPEN_BRACE:
+      return "OPEN_BRACE";
+    case CLOSE_BRACE:
+      return "CLOSE_BRACE";
+    case OPEN_BRACKET:
+      return "OPEN_BRACKET";
+    case CLOSE_BRACKET:
+      return "CLOSE_BRACKET";
+    case SEMICOLON:
+      return "SEMICOLON";
+    case COLON:
+      return "COLON";
+    case COMMA:
+      return "COMMA";
+    case ASSIGNMENT:
+      return "ASSIGNMENT";
+    case BIT_OR:
+      return "BIT_OR";
+    case BIT_AND:
+      return "BIT_AND";
+    case BIT_XOR:
+      return "BIT_XOR";
+    case BIT_NOT:
+      return "BIT_NOT";
+    case NOT:
+      return "NOT";
+    case PLUS:
+      return "PLUS";
+    case MINUS:
+      return "MINUS";
+    case TIMES:
+      return "TIMES";
+    case DIV:
+      return "DIV";
+    case GREATER_THAN:
+      return "GREATER_THAN";
+    case LESS_THAN:
+      return "LESS_THAN";
+    case MOD:
+      return "MOD";
   }
 }
 
@@ -58,9 +171,8 @@ void printToken(Token *token, char **code) {
     data = "\\n";
   }
   printf(
-      ">> pos:\t%d \ttype[%02d]: %s \tdata: <%s>\n",
+      ">> pos:\t%d \ttype: %s \tdata: <%s>\n",
       token->start,
-      token->type,
       tokenName(token),
       data);
   if (token->type != LINE_BREAK) {
@@ -187,7 +299,7 @@ TokenArray *tokenize(char *code, int skip_comments) {
       size_t n = sizeof(KEYWORDS)/sizeof(KEYWORDS[0]);
       for (int i = 0; i < n; ++i) {
         if (strcmp(identifier, KEYWORDS[i]) == 0) {
-          token.type = KEYWORD;
+          token.type = START_OF_KEYWORDS + i + 1;
           break;
         }
       }
