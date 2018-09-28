@@ -1,3 +1,4 @@
 use::fs;
+use::fs;
 var x = 4;
 print x;
