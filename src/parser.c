@@ -39,7 +39,7 @@ void parse_tokens(TokenArray *tokens, char **code) {
         exit(1);
       }
       printToken(&tokens->tokens[cursor], code);
-      exit(1);
+      exit(-1);
     }
   }
 }
