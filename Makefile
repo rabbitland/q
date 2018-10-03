@@ -204,6 +204,33 @@ src/parser.c.s:
 	$(MAKE) -f CMakeFiles/q.dir/build.make CMakeFiles/q.dir/src/parser.c.s
 .PHONY : src/parser.c.s
 
+src/qerr.o: src/qerr.c.o
+
+.PHONY : src/qerr.o
+
+# target to build an object file
+src/qerr.c.o:
+	$(MAKE) -f CMakeFiles/q.dir/build.make CMakeFiles/q.dir/src/qerr.c.o
+.PHONY : src/qerr.c.o
+
+src/qerr.i: src/qerr.c.i
+
+.PHONY : src/qerr.i
+
+# target to preprocess a source file
+src/qerr.c.i:
+	$(MAKE) -f CMakeFiles/q.dir/build.make CMakeFiles/q.dir/src/qerr.c.i
+.PHONY : src/qerr.c.i
+
+src/qerr.s: src/qerr.c.s
+
+.PHONY : src/qerr.s
+
+# target to generate assembly for a file
+src/qerr.c.s:
+	$(MAKE) -f CMakeFiles/q.dir/build.make CMakeFiles/q.dir/src/qerr.c.s
+.PHONY : src/qerr.c.s
+
 src/token.o: src/token.c.o
 
 .PHONY : src/token.o
@@ -249,6 +276,9 @@ help:
 	@echo "... src/parser.o"
 	@echo "... src/parser.i"
 	@echo "... src/parser.s"
+	@echo "... src/qerr.o"
+	@echo "... src/qerr.i"
+	@echo "... src/qerr.s"
 	@echo "... src/token.o"
 	@echo "... src/token.i"
 	@echo "... src/token.s"

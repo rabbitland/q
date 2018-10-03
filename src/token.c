@@ -4,6 +4,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "token.h"
+#include "qerr.h"
 
 char *tokenData(Token *token, char **code) {
   // Skip characters to the start.
@@ -40,6 +41,8 @@ void freeTokenArray(TokenArray *t) {
 }
 
 TokenArray *tokenize(char *code, int skip_comments) {
+  clear_error();
+
   int num_tokens = 0;
   // size = token_array_size + num_tokens * sizeof(Token);
   size_t token_array_size = offsetof(TokenArray, tokens);
@@ -229,10 +232,11 @@ one_byte:
     if (c == '<') { token.type = LESS_THAN; continue; }
     if (c == '%') { token.type = MOD; continue; }
 
-    // TODO(qti3e) Use a global var for error handling.
-    // Maybe call it `q_last_err`.
-    printf("Error! %d %d [%c]\n", cursor, c, c);
-    return NULL;
+    Error err;
+    err.code = UNEXCPECTED_CHAR;
+    err.data.unexcpected_char = (struct UNEXCPECTED_CHAR) { cursor, c };
+    last_error = err;
+    return NULL;    
   } while (1);
 
   TokenArray *ret = tokens;

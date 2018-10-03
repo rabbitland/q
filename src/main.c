@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "token.h"
 #include "parser.h"
+#include "qerr.h"
 
 int main(int argc, char *argv[]) {
   if (argc != 2) {
@@ -27,8 +28,7 @@ int main(int argc, char *argv[]) {
 
   TokenArray *tokens_array = tokenize(code, 0);
   if (!tokens_array) {
-    printf("There was an error!\n");
-    exit(-1);
+    qerror();
   }
   parse_tokens(tokens_array, &code);
   freeTokenArray(tokens_array);
