@@ -203,6 +203,8 @@ two_byte:
     if (c == '>' && next_char == '>') { token.type = RIGHT_SHIFT; continue; }
     if (c == '+' && next_char == '+') { token.type = INCREMENT; continue; }
     if (c == '-' && next_char == '-') { token.type = DECREMENT; continue; }
+    if (c == '-' && next_char == '>') { token.type = ARROW_RIGHT; continue; }
+    if (c == '<' && next_char == '-') { token.type = ARROW_LEFT; continue; }
 
 one_byte:
     // -- One byte tokens

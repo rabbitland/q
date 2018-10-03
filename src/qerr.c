@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
+#include "token.h"
 #include "qerr.h"
 
 // Print the last error and exit the process with a non-zero exit code.
@@ -18,8 +19,12 @@ void qerror() {
     printf(fmt_str, ch, last_error.data.unexcpected_char.pos);
   }
 
-  // TODO(qti3e) Handle other errors.
-  printf("Error!\n");
+  if (last_error.code == UNEXCPECTED_TOKEN) {
+    struct UNEXCPECTED_TOKEN data = last_error.data.unexcpected_token;
+    printf("Excpected %s at %d found %s.\n", TOKEN_STRINGS[data.excpected],
+        data.pos, TOKEN_STRINGS[data.actual]);
+  }
+
   exit(-1);
 }
 

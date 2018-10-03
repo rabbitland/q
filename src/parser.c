@@ -4,9 +4,27 @@
 #include <string.h>
 #include "token.h"
 #include "parser.h"
+#include "qerr.h"
+
+#define EXPECT_TOKEN(tokens, cursor, pos, token, priority) \
+  if (tokens->tokens[cursor + pos].type != token) { \
+    error(priority, tokens->tokens[cursor + pos].start, \
+        tokens->tokens[cursor + pos].type, token); \
+    return NULL; \
+  }
 
 void print_node(Node *node) {
   printf(">> Node\tKIND: %s\n", KIND_STRINGS[node->kind]);
+}
+
+int last_priority = -1;
+void error(int priority, int pos, int actual, int excpected) {
+  if (priority >= last_priority) {
+    last_error.code = UNEXCPECTED_TOKEN;
+    last_error.data.unexcpected_token = (struct UNEXCPECTED_TOKEN){
+      pos, actual, excpected
+    };
+  }
 }
 
 NodeArray* parse_tokens(TokenArray *tokens, char **code) {
@@ -14,6 +32,8 @@ NodeArray* parse_tokens(TokenArray *tokens, char **code) {
 } 
 
 NodeArray* source_file(TokenArray *tokens, char **code, size_t cursor) {
+  clear_error();
+
   Node *tmp_node;
   Node *node = NULL;
   size_t node_length = 0;
@@ -52,11 +72,10 @@ NodeArray* source_file(TokenArray *tokens, char **code, size_t cursor) {
     }
 
     if (!node) {
-      printf("Unecpected token `%s`.\n",
-          tokenName(&tokens->tokens[cursor]));
-      exit(-1);
+      return NULL;
     }
-  } while(1);
+  } while(1); 
+  clear_error();
 
   NodeArray *ret = childs;
   ret->count = count;
@@ -65,10 +84,11 @@ NodeArray* source_file(TokenArray *tokens, char **code, size_t cursor) {
 }
 
 Node *import_statemnet(TokenArray *tokens, char **code, size_t cursor) {
-  if (tokens->tokens[cursor].type != USE_KEYWORD) return NULL;
-  if (tokens->tokens[cursor + 1].type != COLON_COLON) return NULL;
-  if (tokens->tokens[cursor + 2].type != IDENTIFIER) return NULL;
-  if (tokens->tokens[cursor + 3].type != SEMICOLON) return NULL;
+  EXPECT_TOKEN(tokens, cursor, 0, USE_KEYWORD, 0);
+  EXPECT_TOKEN(tokens, cursor, 1, COLON_COLON, 1);
+  EXPECT_TOKEN(tokens, cursor, 2, IDENTIFIER, 2);
+  EXPECT_TOKEN(tokens, cursor, 3, SEMICOLON, 2);
+
   char *module_name = tokenData(&tokens->tokens[cursor + 2], code);
   Node *node = malloc(sizeof(Node));
   node->kind = ImportStatemnetKind;

@@ -30,7 +30,10 @@ int main(int argc, char *argv[]) {
   if (!tokens_array) {
     qerror();
   }
-  parse_tokens(tokens_array, &code);
+  NodeArray *nodes = parse_tokens(tokens_array, &code);
+  if (!nodes) {
+    qerror();
+  }
   freeTokenArray(tokens_array);
 
   return 0;
